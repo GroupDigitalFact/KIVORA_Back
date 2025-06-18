@@ -1,0 +1,85 @@
+{
+	"info": {
+		"_postman_id": "65fb333a-ad49-46ea-a88f-62ad5bad5263",
+		"name": "Kivora",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "41959681"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "Ramiro",
+									"type": "text"
+								},
+								{
+									"key": "surname",
+									"value": "Morales",
+									"type": "text"
+								},
+								{
+									"key": "username",
+									"value": "RamiroMora",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "ramiro12@gmail.com",
+									"type": "text"
+								},
+								{
+									"key": "password",
+									"value": "1234Admin#",
+									"type": "text"
+								},
+								{
+									"key": "profilePicture",
+									"type": "file",
+									"src": "/C:/Users/rmora/OneDrive/Escritorio/45.jpg"
+								},
+								{
+									"key": "phone",
+									"value": "01010203",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3002/kivora/v1/auth/register",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"kivora",
+								"v1",
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "GET",
+						"header": []
+					},
+					"response": []
+				}
+			]
+		}
+	]
+}

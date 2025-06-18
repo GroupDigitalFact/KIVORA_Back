@@ -1,0 +1,37 @@
+{
+  "name": "kivora_back",
+  "version": "1.0.0",
+  "description": "Kivora es una plataforma digital desarrollada con NodeJS, React y MongoDB, que permite la organización de grupos de programación. Incluye sprints para cada usuario en cada tarea, reuniones con llamadas y recordatorios de dichas tareas.",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node index.js",
+    "dev": "node --watch index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/GroupDigitalFact/KIVORA_Back.git"
+  },
+  "author": "DigitalFact",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/GroupDigitalFact/KIVORA_Back/issues"
+  },
+  "homepage": "https://github.com/GroupDigitalFact/KIVORA_Back#readme",
+  "dependencies": {
+    "argon2": "^0.43.0",
+    "cloudinary": "^1.21.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "express-rate-limit": "^7.5.0",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.16.0",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.1",
+    "multer-storage-cloudinary": "^4.0.0"
+  }
+}
