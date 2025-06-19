@@ -1,0 +1,174 @@
+import Cluster from "./cluster.model.js";
+import User from "../user/user.model.js";
+
+// Crear grupo
+export const crearGrupo = async (req, res) => {
+  try {
+    const { nombre, descripcion, propietario } = req.body;
+    const profilePicture = req.file ? req.file.path : null;
+
+    const user = await User.findOne({
+      $or: [{ email: propietario }, { username: propietario }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Propietario no encontrado" });
+    }
+
+    const grupo = await Cluster.create({
+      nombre,
+      descripcion,
+      profilePicture,
+      propietario: user._id,
+      integrantes: [{ usuario: user._id, rol: "admin" }],
+    });
+
+    return res.status(201).json({
+      message: "Grupo creado exitosamente",
+      grupo,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error al crear el grupo",
+      error: err.message,
+    });
+  }
+};
+
+// Agregar integrante
+export const agregarIntegrante = async (req, res) => {
+  try {
+    const { grupoId, integrante } = req.body;
+
+    const user = await User.findOne({
+      $or: [{ email: integrante }, { username: integrante }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Integrante no encontrado" });
+    }
+
+    const grupo = await Cluster.findById(grupoId);
+
+    if (!grupo) {
+      return res.status(404).json({ message: "Grupo no encontrado" });
+    }
+
+    if (grupo.propietario.toString() !== req.usuario._id.toString()) {
+      return res.status(403).json({ message: "No tienes permisos para agregar integrantes a este grupo" });
+    }
+
+    grupo.integrantes.push({ usuario: user._id, rol: "usuario" });
+    await grupo.save();
+
+    return res.status(200).json({
+      message: "Integrante agregado exitosamente",
+      grupo: await grupo.populate("integrantes.usuario"),
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error al agregar integrante",
+      error: err.message,
+    });
+  }
+};
+
+// Eliminar integrante
+export const eliminarIntegrante = async (req, res) => {
+  try {
+    const { grupoId, integrante } = req.body;
+
+    const user = await User.findOne({
+      $or: [{ email: integrante }, { username: integrante }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Integrante no encontrado" });
+    }
+
+    const grupo = await Cluster.findById(grupoId);
+
+    if (!grupo) {
+      return res.status(404).json({ message: "Grupo no encontrado" });
+    }
+
+    if (grupo.propietario.toString() !== req.usuario._id.toString()) {
+      return res.status(403).json({ message: "No tienes permisos para eliminar integrantes de este grupo" });
+    }
+
+    grupo.integrantes = grupo.integrantes.filter(
+      (i) => i.usuario.toString() !== user._id.toString()
+    );
+    await grupo.save();
+
+    return res.status(200).json({
+      message: "Integrante eliminado exitosamente",
+      grupo: await grupo.populate("integrantes.usuario"),
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error al eliminar integrante",
+      error: err.message,
+    });
+  }
+};
+
+// Editar descripción
+export const editarDescripcion = async (req, res) => {
+  try {
+    const { grupoId, descripcion } = req.body;
+
+    const grupo = await Cluster.findByIdAndUpdate(
+      grupoId,
+      { descripcion },
+      { new: true }
+    );
+
+    if (!grupo) {
+      return res.status(404).json({ message: "Grupo no encontrado" });
+    }
+
+    if (grupo.propietario.toString() !== req.usuario._id.toString()) {
+      return res.status(403).json({ message: "No tienes permisos para editar la descripción de este grupo" });
+    }
+    
+    return res.status(200).json({
+      message: "Descripción editada exitosamente",
+      grupo,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error al editar descripción",
+      error: err.message,
+    });
+  }
+};
+
+// Listar grupos
+export const listarGrupos = async (req, res) => {
+  try {
+    const { usuario } = req.body;
+
+    const user = await User.findOne({
+      $or: [{ email: usuario }, { username: usuario }],
+    });
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuario no encontrado" });
+    }
+
+    const grupos = await Cluster.find({
+      "integrantes.usuario": user._id,
+    }).populate("integrantes.usuario");
+
+    return res.status(200).json({
+      message: "Grupos listados exitosamente",
+      grupos,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error al listar grupos",
+      error: err.message,
+    });
+  }
+};
