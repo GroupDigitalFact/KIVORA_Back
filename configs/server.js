@@ -21,6 +21,7 @@ const middlewares = (app) => {
 const routes = (app) => {
     app.use("/kivora/v1/auth", authRoutes);
     app.use("/kivora/v1/cluster", clusterRoutes);
+    app.use("/kivora/v1/user", userRoutes);
 };
 
 const conectarDB = async () => {
