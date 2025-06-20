@@ -3,7 +3,6 @@ import { usernameExist, emailExist } from "../helpers/db-validators.js";
 import { validarCampos } from "./validar-campos.js";
 import { handleErrors } from "./handle-errors.js";
 import { validateJWT } from "./validate-jwt.js";
-import { hasRoles } from "./validate-roles.js";
 
 export const validatorRegister = [
   body("name").notEmpty().withMessage("Name is required").isLength({ max: 30 }).withMessage("Name cannot exceed 30 characters"),
@@ -27,4 +26,15 @@ export const validatorLogin = [
     body("password").notEmpty().withMessage("La contraseña es obligatoria"),
     validarCampos,
     handleErrors
+];
+
+export const validatorUpdateUser = [
+  validateJWT,
+  body("name").optional().isLength({ max: 30 }).withMessage("Name cannot exceed 30 characters"),
+  body("surname").optional().isLength({ max: 30 }).withMessage("Surname cannot exceed 30 characters"),
+  body("username").optional().isLength({ max: 30 }).withMessage("Username cannot exceed 30 characters"),
+  body("email").optional().isEmail().withMessage("Invalid email format"),
+  body("phone").optional().isLength({ min: 8 }).withMessage("Phone number must be at least 8 digits"),
+  validarCampos,
+  handleErrors
 ];
