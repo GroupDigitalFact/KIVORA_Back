@@ -4,23 +4,16 @@ import User from "../user/user.model.js";
 // Crear grupo
 export const crearGrupo = async (req, res) => {
   try {
-    const { nombre, descripcion, propietario } = req.body;
+    const id = req.usuario._id;
+    const { nombre, descripcion } = req.body;
     const profilePicture = req.file ? req.file.path : null;
-
-    const user = await User.findOne({
-      $or: [{ email: propietario }, { username: propietario }],
-    });
-
-    if (!user) {
-      return res.status(404).json({ message: "Propietario no encontrado" });
-    }
 
     const grupo = await Cluster.create({
       nombre,
       descripcion,
       profilePicture,
-      propietario: user._id,
-      integrantes: [{ usuario: user._id, rol: "admin" }],
+      propietario: id,
+      integrantes: [{ usuario: id, rol: "admin" }],
     });
 
     return res.status(201).json({
