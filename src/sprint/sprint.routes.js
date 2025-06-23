@@ -5,25 +5,30 @@ import {
     getSprint,
     updateSprint,
     deleteSprint,
-    searchSprints
+    searchSprints,
+    stateDurationSprint
 } from "./sprint.controller.js";
 import {
     validatorCreateSprint,
     validatorDeleteSprint,
     validatorUpdateSprint
 } from "../middlewares/sprint-validate.js";
+import { authMiddleware } from "../middlewares/auth-validate.js"
+
 
 const router = Router();
 
-router.post("/createSprint", validatorCreateSprint, createSprint);
+router.post("/createSprint", authMiddleware, createSprint);
 
-router.get("/getSprints", getSprints);
+router.get("/getSprints/:projectId", getSprints);
 
 router.get("/getSprint/:id", getSprint);
 
-router.put("/updateSprint/:id", validatorUpdateSprint, updateSprint);
+router.put("/updateSprint/:id", authMiddleware, updateSprint);
 
-router.delete("/deleteSprint/:id", validatorDeleteSprint, deleteSprint);
+router.put("/stateDurationSprint/:id", authMiddleware, stateDurationSprint);
+
+router.delete("/deleteSprint/:id", authMiddleware, deleteSprint);
 
 router.get("/searchSprints", searchSprints);
 
