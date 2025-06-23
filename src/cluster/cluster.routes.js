@@ -2,12 +2,12 @@ import { Router } from "express";
 import {crearGrupo,listarGrupos,agregarIntegrante,eliminarIntegrante,editarDescripcion,} from "./cluster.controller.js";
 import {validatorCrearGrupo,validatorAgregarIntegrante,validatorEliminarIntegrante,validatorEditarDescripcion,} from "../middlewares/cluster-validate.js";
 import { uploadProfilePicture } from "../middlewares/multer-uploads.js";
-
+import { authMiddleware } from "../middlewares/auth-validate.js"
 
 const router = Router();
 
 // Crear grupo
-router.post("/crear",uploadProfilePicture.single("profilePicture"),crearGrupo);
+router.post("/crear",uploadProfilePicture.single("profilePicture"), authMiddleware, crearGrupo);
 
 // Listar grupos donde el usuario es integrante
 router.get("/listar", listarGrupos);
