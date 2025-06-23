@@ -9,6 +9,7 @@ import apiLimiter from "../src/middlewares/validate-limiter.js";
 import authRoutes from "../src/auth/auth.routes.js";
 import sprintRoutes from "../src/sprint/sprint.routes.js";
 
+
 const middlewares = (app) => {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
@@ -21,6 +22,8 @@ const middlewares = (app) => {
 const routes = (app) => {
     app.use("/kivora/v1/auth", authRoutes);
     app.use("/kivora/v1/sprint", sprintRoutes);
+    app.use("/kivora/v1/cluster", clusterRoutes);
+    app.use("/kivora/v1/user", userRoutes);
 };
 
 const conectarDB = async () => {

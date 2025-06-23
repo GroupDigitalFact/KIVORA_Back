@@ -74,8 +74,233 @@
 				{
 					"name": "Login",
 					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\"email\":\"ramiro12@gmail.com\",\r\n\"password\": \"1235Admin#\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3002/kivora/v1/auth/login",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"kivora",
+								"v1",
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "user",
+			"item": [
+				{
+					"name": "getUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODUyMTcyNzg4M2VkYjViMGI3NDJiNDEiLCJpYXQiOjE3NTAyNzE1MjcsImV4cCI6MTc1MDI3NTEyN30.VSUrKnPyCv6x_Dmvo9QrKy6pGsoQCMSN9k6ygQl53Yw",
+									"type": "string"
+								}
+							]
+						},
 						"method": "GET",
-						"header": []
+						"header": [],
+						"url": {
+							"raw": "http://localhost:3002/kivora/v1/user/getUser",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"kivora",
+								"v1",
+								"user",
+								"getUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "updateUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODUyMTcyNzg4M2VkYjViMGI3NDJiNDEiLCJpYXQiOjE3NTAyNzE1MjcsImV4cCI6MTc1MDI3NTEyN30.VSUrKnPyCv6x_Dmvo9QrKy6pGsoQCMSN9k6ygQl53Yw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"Jorge\",\r\n    \"surname\": \"Pereira\",\r\n    \"username\": \"Pereira\",\r\n    \"phone\": \"53276129\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3002/kivora/v1/user/updateUser",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"kivora",
+								"v1",
+								"user",
+								"updateUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "deleteUser",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODUyMTcyNzg4M2VkYjViMGI3NDJiNDEiLCJpYXQiOjE3NTAyNzE1MjcsImV4cCI6MTc1MDI3NTEyN30.VSUrKnPyCv6x_Dmvo9QrKy6pGsoQCMSN9k6ygQl53Yw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3002/kivora/v1/user/deleteUser",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"kivora",
+								"v1",
+								"user",
+								"deleteUser"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "profilePictureUpdate",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODUyMTcyNzg4M2VkYjViMGI3NDJiNDEiLCJpYXQiOjE3NTAyNzE1MjcsImV4cCI6MTc1MDI3NTEyN30.VSUrKnPyCv6x_Dmvo9QrKy6pGsoQCMSN9k6ygQl53Yw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "profilePicture",
+									"type": "file",
+									"src": "/C:/Users/rmora/OneDrive/Escritorio/61pagina.jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "http://localhost:3002/kivora/v1/user/profilePictureUpdate",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"kivora",
+								"v1",
+								"user",
+								"profilePictureUpdate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "changePassword",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1aWQiOiI2ODUyMTcyNzg4M2VkYjViMGI3NDJiNDEiLCJpYXQiOjE3NTAyNzE1MjcsImV4cCI6MTc1MDI3NTEyN30.VSUrKnPyCv6x_Dmvo9QrKy6pGsoQCMSN9k6ygQl53Yw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\": \"1234Admin#\",\r\n    \"newPassword\": \"1235Admin#\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3002/kivora/v1/user/changePassword",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"kivora",
+								"v1",
+								"user",
+								"changePassword"
+							]
+						}
 					},
 					"response": []
 				}
