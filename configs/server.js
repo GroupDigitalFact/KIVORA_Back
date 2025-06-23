@@ -7,7 +7,9 @@ import morgan from "morgan";
 import { dbConnection } from "./mongo.js";
 import apiLimiter from "../src/middlewares/validate-limiter.js";
 import authRoutes from "../src/auth/auth.routes.js";
+import userRoutes from "../src/user/user.routes.js";
 import clusterRoutes from "../src/cluster/cluster.routes.js";
+import projectRoutes from "../src/project/project.routes.js";
 
 const middlewares = (app) => {
   app.use(express.urlencoded({ extended: false }));
@@ -22,6 +24,7 @@ const routes = (app) => {
     app.use("/kivora/v1/auth", authRoutes);
     app.use("/kivora/v1/cluster", clusterRoutes);
     app.use("/kivora/v1/user", userRoutes);
+    app.use("/kivora/v1/project", projectRoutes);
 };
 
 const conectarDB = async () => {

@@ -1,13 +1,41 @@
 import Project from "./project.model.js";
+import Cluster from "../cluster/cluster.model.js"
 
 export const addProject = async (req, res) => {
   try {
     const id = req.usuario._id;
     const data = req.body;
 
-    data.scrumMaster = id; 
+    const scrumMasterId = id;
 
-    const project = await Project.create(data);
+    const group = await Cluster.findById(data.cluster);
+
+    if(!group) {
+        return res.status(404).json({
+            message: "Group not found",
+        });
+    }
+
+    const allUserIds = group.integrantes.map((int) => int.usuario.toString());
+    
+    const developers = allUserIds.filter(
+        (userId) => userId !== scrumMasterId.toString() && userId !== data.productOwner
+    );
+
+    const projectData ={
+        title: data.title,
+        description: data.description,
+        startDate: data.startDate,
+        endDate: data.endDate,
+        projectType: data.projectType,
+        cluster: data.cluster,
+        scrumMaster: scrumMasterId,
+        productOwner: data.productOwner,
+        developers: developers,
+        state: true
+
+    }
+    const project = await Project.create(projectData);
 
     if(!project) {
       return res.status(400).json({

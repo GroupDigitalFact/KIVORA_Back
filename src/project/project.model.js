@@ -7,6 +7,11 @@ const ProjectSchema = new Schema({
     required: [true, "Project title is required"],
     maxLength: [100, "Title cannot exceed 100 characters"]
   },
+  description: {
+    type: String,
+    required: [true, "Project description is required"],
+    maxLength: [1000, "Description cannot exceed 1000 characters"]
+  },
   startDate: {
     type: Date,
     required: [true, "Start date is required"]
@@ -20,9 +25,9 @@ const ProjectSchema = new Schema({
     enum: ["Academic", "Informatic"],
     required: [true, "Project type is required"]
   },
-  group: {
+  cluster: {
     type: Schema.Types.ObjectId,
-    ref: "Group",
+    ref: "Cluster",
     required: [true, "Group is required"]
   },
   scrumMaster: {
