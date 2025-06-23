@@ -10,9 +10,9 @@ const sprintSchema = Schema({
         required: [true, 'Sprint number is required'],
         unique: true,
     },
-    description: {
+    objective: {
         type: String,
-        required: [true, 'Description is required'],
+        required: [true, 'objective is required'],
     },
     task: [
         {
@@ -24,7 +24,8 @@ const sprintSchema = Schema({
     state: {
         type: String,
         enum: ['Atrasado', 'En curso', 'Finalizado'],
-        required: [true, 'State is required']
+        required: [true, 'State is required'],
+        default: 'En curso'
     },
     project: {
         type: Schema.Types.ObjectId,

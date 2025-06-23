@@ -1,16 +1,38 @@
 import Sprint from './sprint.model.js';
+import Project from '../project/project.model.js';
 
 export const createSprint = async (req, res) => {
     try {
         const data = req.body;
+        
+        const project = await Project.findById(data.project).where({ state: true });
+        if (!project) {
+            return res.status(404).json({ message: 'Project not found or inactive' });
+        }
 
-        const sprint = await Sprint.create(data);
+        const nextSprintNumber = project.sprints.length === 0 
+            ? 1 
+            : project.sprints[project.sprints.length - 1].noSprint + 1;
+
+        const sprint = await Sprint.create({
+            ...data,
+            number: nextSprintNumber
+        });
+
+        project.sprints.push({
+            idSprint: sprint._id,
+            noSprint: nextSprintNumber
+        });
+        await project.save();
 
         return res.status(201).json({
             message: 'Sprint has been created',
-            sprint
-        })
-    } catch ( err ) {
+            sprint: {
+                ...sprint.toObject(),
+                number: nextSprintNumber
+            }
+        });
+    } catch (err) {
         return res.status(500).json({
             message: 'Sprint creation failed',
             error: err.message
@@ -20,8 +42,8 @@ export const createSprint = async (req, res) => {
 
 export const getSprints = async (req, res) => {
     try {
-        const sprints = await Sprint.find({ status: true })
-            .populate('task')
+        const { projectId }= req.params;
+        const sprints = await Sprint.find({project: projectId, status: true })
             .populate('project');
 
         return res.status(200).json({
@@ -41,7 +63,6 @@ export const getSprint = async (req, res) => {
         const { id } = req.params;
 
         const sprint = await Sprint.findById(id)
-            .populate('task')
             .populate('project');
 
         if (!sprint) {
@@ -68,6 +89,39 @@ export const updateSprint = async (req, res) => {
         const data = req.body;
 
         const sprint = await Sprint.findByIdAndUpdate(id, data, { new: true });
+
+        if (!sprint) {
+            return res.status(404).json({
+                message: 'Sprint not found'
+            });
+        }
+
+        return res.status(200).json({
+            message: 'Sprint updated successfully',
+            sprint
+        });
+    } catch (err) {
+        return res.status(500).json({
+            message: 'Error updating sprint',
+            error: err.message
+        })
+    }
+}
+
+
+export const stateDurationSprint = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const {state} = req.body;
+
+        const sprint = await Sprint.findByIdAndUpdate(id, {state: state},{ new: true });
+
+        if (!sprint) {
+            return res.status(404).json({
+                message: 'Sprint not found'
+            });
+        }
+
         return res.status(200).json({
             message: 'Sprint updated successfully',
             sprint
@@ -94,7 +148,6 @@ export const deleteSprint = async (req, res) => {
 
         return res.status(200).json({
             message: 'Sprint deleted successfully',
-            sprint
         })
     } catch (err) {
         return res.status(500).json({

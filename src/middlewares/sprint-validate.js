@@ -8,7 +8,6 @@ export const validatorCreateSprint = [
     validateJWT,
     body('title').notEmpty().withMessage('Title is required'),
     body('description').notEmpty().withMessage('Description is required'),
-    body('task').notEmpty().withMessage('Task is required'),
     body('state').notEmpty().withMessage('State is required'),
     body('project').notEmpty().withMessage('Project is required'),
     body('startDate').notEmpty().withMessage('Start date is required')
