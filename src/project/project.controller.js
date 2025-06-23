@@ -32,8 +32,6 @@ export const addProject = async (req, res) => {
         scrumMaster: scrumMasterId,
         productOwner: data.productOwner,
         developers: developers,
-        state: true
-
     }
     const project = await Project.create(projectData);
 
@@ -58,12 +56,12 @@ export const addProject = async (req, res) => {
 
 export const getProjects = async (req, res) => {
     try{
-        const idGroup = req.params.idGroup;
-        const projects = await Project.find({group: idGroup})
+        const {idGroup} = req.params;
+        const projects = await Project.find({cluster: idGroup, state: true})
             .populate("scrumMaster", "name surname username")
             .populate("productOwner", "name surname username")
             .populate("developers", "name surname username")
-            .populate("group", "name");
+            .populate("cluster", "name");
 
         if(!projects || projects.length === 0) {
             return res.status(404).json({
@@ -87,7 +85,7 @@ export const getProjects = async (req, res) => {
 
 export const updateProject = async (req, res) => {
     try{
-        const idProject = req.params.idProject;
+        const {idProject} = req.params;
         const data = req.body;
 
         const project = await Project.findByIdAndUpdate(idProject, data, { new: true });
@@ -113,7 +111,7 @@ export const updateProject = async (req, res) => {
 
 export const deleteProject = async (req, res) => {
     try{
-        const idProject = req.params.idProject;
+        const {idProject} = req.params;
 
         const project = await Project.findByIdAndUpdate(idProject, { state: false }, { new: true });
 

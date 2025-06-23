@@ -5,19 +5,17 @@ import {
   updateProject,
   deleteProject
 } from "./project.controller.js";
+import { authMiddleware } from "../middlewares/auth-validate.js"
+
 
 const router = Router();
 
-// Crear un nuevo proyecto
-router.post("/addProject", addProject);
+router.post("/addProject", authMiddleware, addProject);
 
-// Obtener proyectos por grupo
-router.get("/getProjects/:idGroup", getProjects);
+router.get("/getProjects/:idGroup", authMiddleware, getProjects);
 
-// Actualizar un proyecto por ID
 router.put("/updateProject/:idProject", updateProject);
 
-// Eliminar (soft delete) un proyecto por ID
 router.delete("/deleteProject/:idProject", deleteProject);
 
 export default router;

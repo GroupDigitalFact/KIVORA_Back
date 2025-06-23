@@ -48,8 +48,15 @@ const ProjectSchema = new Schema({
   ],
   sprints: [
     {
+      idSprint:{
       type: Schema.Types.ObjectId,
       ref: "Sprint"
+      },
+      noSprint: {
+        type: Number,
+        required: [true, "Sprint number is required"],
+        default: 0
+      },
     }
   ],
   state:{
