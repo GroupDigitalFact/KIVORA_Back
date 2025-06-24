@@ -1,5 +1,11 @@
+import Project from "../project/project.model.js";
+
 export const hasRoles = (...roles) => {
     return (req, res, next) =>{
+        const projectId = req.params.projectId;
+        
+        const project = Project.findById(projectId);
+        
         if(!req.usuario){
             return res.status(500).json({
                 success: false,

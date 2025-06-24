@@ -6,7 +6,9 @@ import {
     updateSprint,
     deleteSprint,
     searchSprints,
-    stateDurationSprint
+    stateDurationSprint,
+    addBacklogToSprint,
+    removeBacklogFromSprint
 } from "./sprint.controller.js";
 import {
     validatorCreateSprint,
@@ -31,5 +33,9 @@ router.put("/stateDurationSprint/:id", authMiddleware, stateDurationSprint);
 router.delete("/deleteSprint/:id", authMiddleware, deleteSprint);
 
 router.get("/searchSprints", searchSprints);
+
+router.post("/addBacklogToSprint/:id", authMiddleware, addBacklogToSprint)
+
+router.delete("/removeBacklogFromSprint/:id",authMiddleware, removeBacklogFromSprint)
 
 export default router;
