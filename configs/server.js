@@ -14,6 +14,7 @@ import sprintRoutes from "../src/sprint/sprint.routes.js";
 import taskRoutes from "../src/task/task.routes.js"
 
 
+
 const middlewares = (app) => {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
@@ -30,6 +31,7 @@ const routes = (app) => {
     app.use("/kivora/v1/user", userRoutes);
     app.use("/kivora/v1/project", projectRoutes);
     app.use("/kivora/v1/task", taskRoutes);
+
 };
 
 const conectarDB = async () => {
