@@ -11,6 +11,8 @@ import userRoutes from "../src/user/user.routes.js";
 import clusterRoutes from "../src/cluster/cluster.routes.js";
 import projectRoutes from "../src/project/project.routes.js";
 import sprintRoutes from "../src/sprint/sprint.routes.js";
+import taskRoutes from "../src/task/task.routes.js"
+
 
 
 const middlewares = (app) => {
@@ -28,6 +30,8 @@ const routes = (app) => {
     app.use("/kivora/v1/cluster", clusterRoutes);
     app.use("/kivora/v1/user", userRoutes);
     app.use("/kivora/v1/project", projectRoutes);
+    app.use("/kivora/v1/task", taskRoutes);
+
 };
 
 const conectarDB = async () => {
