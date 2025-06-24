@@ -12,7 +12,7 @@ cloudinary.v2.config({
 const profileImageStorage = new CloudinaryStorage({
   cloudinary: cloudinary.v2,
   params: {
-    folder: "profile",
+    folder: "profileUserKivora",
     public_id: (req, file) => {
       const flieExtension = extname(file.originalname);
       const fileName = file.originalname.split(flieExtension)[0];

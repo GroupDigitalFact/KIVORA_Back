@@ -23,11 +23,18 @@ const TaskSchema = new Schema({
   },
   state: {
     type: String,
-    enum: ["Late", "InProgress", "In Review", "finalized"],
+    enum: ["Late", "In Progress", "In Review", "finalized" ],
     default: "In Progress"
+  },
+  isUrgent: {
+    type: Boolean,
+    default: false
+  },
+  tags: {
+    type: [String],
+    default: []
   }
-},
-{
+}, {
   versionKey: false,
   timestamps: true
 });
