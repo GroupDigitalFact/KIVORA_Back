@@ -1,9 +1,10 @@
 import { Router } from "express";
-import {addTask,listTasks,updateTask,deleteService,reassignTask  ,markTaskUrgent , setTaskTags} from "./task.controller.js";
-
+import {addTask,listTasks,updateTask,deleteService,reassignTask  ,markTaskUrgent, addTaskAttachments,  deleteTaskAttachments, setTaskTags} from "./task.controller.js";
+import { uploadTaskFiles } from "../middlewares/multer-uploads.js";
+import{ authMiddleware } from "../middlewares/auth-validate.js";
 const router = Router();
 
-router.post("/addTask", addTask);
+router.post("/addTask", uploadTaskFiles.array("attachments", 10), addTask);
 
 router.post("/listTasks", listTasks);
 
@@ -16,6 +17,19 @@ router.put("/reassignTask", reassignTask);
 router.post("/markTaskUrgent", markTaskUrgent)
 
 router.post("/setTaskTags", setTaskTags);
+
+router.put(
+  "/addTaskAttachments/:taskId",
+  uploadTaskFiles.array("attachments", 10),
+  authMiddleware,
+  addTaskAttachments
+);
+
+router.delete(
+  "/deleteTaskAttachments/:taskId",
+  authMiddleware,
+  deleteTaskAttachments
+);
 
 
 export default router;

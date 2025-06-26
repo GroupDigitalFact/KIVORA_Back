@@ -2,10 +2,12 @@ import Project from "../project/project.model.js";
 import Sprint from "../sprint/sprint.model.js";
 import Cluster from "../cluster/cluster.model.js";
 import Task from "./task.model.js";
+import cloudinary from "cloudinary";
 
 export const addTask = async (req, res) => {
   try {
     const { title, description, sprint, assignedTo, scrumMasterId } = req.body; 
+    const attachments = req.files.map(file => file.filename);
 
     const sprintDoc = await Sprint.findById(sprint);
     
@@ -38,8 +40,7 @@ export const addTask = async (req, res) => {
       });
     }
 
-    const task = await Task.create({ title, description, sprint, assignedTo });
-
+    const task = await Task.create({ title, description, sprint, assignedTo, attachments });
     await Sprint.findByIdAndUpdate(sprint, { $push: { task: task._id } });
 
     return res.status(200).json({
@@ -222,3 +223,89 @@ export const setTaskTags = async (req, res) => {
   }
 };
 
+export const addTaskAttachments = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    const files = req.files;
+
+    const task = await Task.findById(taskId);
+    
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    if (files && files.length > 0) {
+      const newAttachments = files.map(file => file.filename);
+      task.attachments = [...task.attachments, ...newAttachments];
+
+      await task.save();
+    }
+
+    const taskObj = task.toObject();
+    taskObj.attachmentUrls = task.attachments.map(filename => 
+      cloudinary.v2.url(filename)
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Attachments added successfully",
+      task: taskObj,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Error adding attachments",
+      error: err.message,
+    });
+  }
+};
+
+
+export const deleteTaskAttachments = async (req, res) => {
+  try {
+    const { taskId } = req.params;
+    let { filenames } = req.body; 
+
+    filenames = Array.isArray(filenames) ? filenames : [filenames];
+
+    const task = await Task.findById(taskId);
+    
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    for (const filename of filenames) {
+      if (task.attachments.includes(filename)) {
+        await cloudinary.v2.uploader.destroy(filename);
+        task.attachments = task.attachments.filter(
+          attachment => attachment !== filename
+        );
+      }
+    }
+
+    await task.save();
+
+    const taskObj = task.toObject();
+    taskObj.attachmentUrls = task.attachments.map(filename => 
+      cloudinary.v2.url(filename)
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Attachments deleted successfully",
+      task: taskObj,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Error deleting attachments",
+      error: err.message,
+    });
+  }
+};
