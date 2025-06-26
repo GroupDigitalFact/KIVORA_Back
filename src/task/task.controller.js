@@ -309,3 +309,37 @@ export const deleteTaskAttachments = async (req, res) => {
     });
   }
 };
+
+export const filterTasks = async (req, res) => {
+  try {
+    const { state, assignedTo, tags, dateStart, dateEnd } = req.body;
+    const filter = {};
+
+    if (state) filter.state = state;
+    if (assignedTo) filter.assignedTo = assignedTo;
+    if (tags) filter.tags = { $all: Array.isArray(tags) ? tags : [tags] };
+    if (dateStart || dateEnd) {
+      let sprintFilter = {};
+      if (dateStart) sprintFilter.dateStart = { $gte: new Date(dateStart) };
+      if (dateEnd) sprintFilter.dateEnd = { ...sprintFilter.dateEnd, $lte: new Date(dateEnd) };
+
+      const sprints = await Sprint.find(sprintFilter).select("_id");
+      const sprintIds = sprints.map(s => s._id);
+
+      if (sprintIds.length === 0) {
+        return res.status(200).json({ tasks: [] });
+      }
+
+      filter.sprint = { $in: sprintIds };
+    }
+
+    const tasks = await Task.find(filter);
+
+    return res.status(200).json({ tasks });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error filtering tasks",
+      error: err.message,
+    });
+  }
+};
