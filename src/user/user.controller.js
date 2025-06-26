@@ -204,3 +204,38 @@ export const modificarContraseña = async (req, res) => {
         });
     }
 };
+
+export const getMyUser = async (req, res) => {
+  try {
+    const id = req.usuario._id;
+    const user = await User.find({ _id: id, state: true });
+
+    if (!user || user.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "user not found",
+      });
+    }
+
+    const userWithImage = user.map((userImage) => {
+      const userObj = userImage.toObject();
+
+      userObj.imageUrl = userImage.profilePicture
+        ? cloudinary.v2.url(userImage.profilePicture)
+        : null;
+
+      return userObj;
+    });
+
+    return res.status(200).json({
+      success: true,
+      services: userWithImage,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Error getting users",
+      error: err.message,
+    });
+  }
+};

@@ -6,7 +6,8 @@ import {
   deleteUser,
   updateImage,
   deleteImage,
-  modificarContraseña
+  modificarContraseña,
+  getMyUser
 } from "./user.controller.js";
 import { validatorUpdateUser } from "../middlewares/user-validate.js";
 import { authMiddleware } from "../middlewares/auth-validate.js";
@@ -29,5 +30,7 @@ router.put(
 router.delete("/profilePictureDelete", authMiddleware, deleteImage);
 
 router.patch("/changePassword", authMiddleware, modificarContraseña);
+
+router.get("/getMyUser", authMiddleware, getMyUser)
 
 export default router;
