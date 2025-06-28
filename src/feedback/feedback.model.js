@@ -30,6 +30,11 @@ const FeedbackSchema = new Schema(
       ref: "User",
       required: true,
     },
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+      required: true,
+    },
     status: {
       type: Boolean,
       default: true,
