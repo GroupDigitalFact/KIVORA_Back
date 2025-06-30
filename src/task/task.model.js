@@ -17,6 +17,11 @@ const TaskSchema = new Schema(
       ref: "Sprint",
       required: [true, "Sprint is required"],
     },
+    project: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Project",
+      required: [true, "Project is required"]
+    },
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

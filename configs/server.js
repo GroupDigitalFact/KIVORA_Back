@@ -14,6 +14,7 @@ import sprintRoutes from "../src/sprint/sprint.routes.js";
 import backlogRoutes from "../src/backlog/backlog.routes.js";
 import taskRoutes from "../src/task/task.routes.js"
 import eventRoutes from "../src/event/event.routes.js";
+import feedbackRoutes from "../src/feedback/feedback.routes.js"
 
 
 const middlewares = (app) => {
@@ -34,6 +35,7 @@ const routes = (app) => {
     app.use("/kivora/v1/backlog", backlogRoutes);
     app.use("/kivora/v1/task", taskRoutes);
     app.use("/kivora/v1/event", eventRoutes);
+    app.use("/kivora/v1/feedback", feedbackRoutes);
 };
 
 const conectarDB = async () => {

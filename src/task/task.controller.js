@@ -40,7 +40,7 @@ export const addTask = async (req, res) => {
       });
     }
 
-    const task = await Task.create({ title, description, sprint, assignedTo, attachments });
+    const task = await Task.create({ title, description, sprint, assignedTo, attachments, project: project._id });
     await Sprint.findByIdAndUpdate(sprint, { $push: { task: task._id } });
 
     return res.status(200).json({
