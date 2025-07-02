@@ -1,10 +1,22 @@
 import Sprint from "./sprint.model.js";
 import Project from "../project/project.model.js";
 import Backlog from "../backlog/backlog.model.js";
+import { createNotification } from "../helpers/notifications-validators.js";
+import Cluster from "../cluster/cluster.model.js";
 
 export const createSprint = async (req, res) => {
   try {
     const data = req.body;
+    const sprintExistente = await Sprint.findOne({
+      tittle: data.tittle.trim(),
+      project: data.project,
+    });
+
+    if (sprintExistente) {
+      return res.status(400).json({
+        message: "Ya existe un sprint con ese nombre en este proyecto",
+      });
+    }
 
     const backlogIds = data.backlog || [];
 
@@ -47,6 +59,21 @@ export const createSprint = async (req, res) => {
       noSprint: nextSprintNumber,
     });
     await project.save();
+
+    const grupo = await Cluster.findById(project.cluster);
+
+    if (grupo) {
+      const usuarios = grupo.integrantes.map((id) => id.usuario);
+      for (const userId of usuarios) {
+        await createNotification({
+          user: userId,
+          title: `Nuevo sprint de ${project.title}. Numero de Sprint #${nextSprintNumber}`,
+          message: `El sprint empieza el ${data.dateStart} y finaliza el "${data.dateEnd}".`,
+          relatedTo: sprint._id,
+          relatedType: "Sprint",
+        });
+      }
+    }
 
     return res.status(201).json({
       message: "Sprint has been created",
@@ -160,6 +187,49 @@ export const stateDurationSprint = async (req, res) => {
           { state: "Discarded" },
           { new: true }
         );
+      }
+    }
+
+    const project = await Project.findById(sprint.project);
+    const grupo = await Cluster.findById(project?.cluster);
+
+    if (grupo) {
+      const usuarios = grupo.integrantes.map((i) => i.usuario);
+      let title = "";
+      let message = "";
+
+      const opcionesFecha = { day: "numeric", month: "long", year: "numeric" };
+      const fechaFinal = new Date().toLocaleDateString("es-ES", opcionesFecha);
+      const fechaInicio = new Date(sprint.dateStart).toLocaleDateString(
+        "es-ES",
+        opcionesFecha
+      );
+
+      switch (state) {
+        case "En curso":
+          title = `Sprint en curso: ${sprint.tittle}`;
+          message = `El sprint número ${sprint.number} ha comenzado. Fecha de inicio: ${fechaInicio}.`;
+          break;
+
+        case "Atrasado":
+          title = `Sprint atrasado: ${sprint.tittle}`;
+          message = `El sprint número ${sprint.number} se ha marcado como atrasado. Revisa las tareas pendientes.`;
+          break;
+
+        case "Finalizado":
+          title = `Sprint finalizado: ${sprint.tittle}`;
+          message = `El sprint número ${sprint.number} ha sido finalizado el día ${fechaFinal}.`;
+          break;
+      }
+
+      for (const userId of usuarios) {
+        await createNotification({
+          user: userId,
+          title,
+          message,
+          relatedTo: sprint._id,
+          relatedType: "Sprint",
+        });
       }
     }
 
@@ -286,21 +356,23 @@ export const removeBacklogFromSprint = async (req, res) => {
       return res.status(404).json({ message: "Backlog not found in sprint" });
     }
 
-    sprint.backlog = sprint.backlog.filter(
-      id => id.toString() !== backlogId
-    );
+    sprint.backlog = sprint.backlog.filter((id) => id.toString() !== backlogId);
     await sprint.save();
 
-    await Backlog.findByIdAndUpdate(backlogId, {state: "Pending"}, {new: true,});
+    await Backlog.findByIdAndUpdate(
+      backlogId,
+      { state: "Pending" },
+      { new: true }
+    );
 
     return res.status(200).json({
       message: "Backlog removed from sprint",
-      sprint
+      sprint,
     });
   } catch (err) {
     return res.status(500).json({
       message: "Error removing backlog from sprint",
-      error: err.message
+      error: err.message,
     });
   }
 };

@@ -3,54 +3,67 @@ import Sprint from "../sprint/sprint.model.js";
 import Cluster from "../cluster/cluster.model.js";
 import Task from "./task.model.js";
 import cloudinary from "cloudinary";
+import { createNotification } from "../helpers/notifications-validators.js";
 
 export const addTask = async (req, res) => {
   try {
-    const { title, description, sprint, assignedTo, scrumMasterId } = req.body; 
-    const attachments = req.files.map(file => file.filename);
+    const { title, description, sprint, assignedTo } = req.body;
+    const attachments = req.files.map((file) => file.filename);
 
     const sprintDoc = await Sprint.findById(sprint);
-    
-    if (!sprintDoc) return res.status(404).json({ 
-      message: "Sprint not found" 
-    });
+
+    if (!sprintDoc)
+      return res.status(404).json({
+        message: "Sprint not found",
+      });
 
     const project = await Project.findById(sprintDoc.project);
-    if (!project) return res.status(404).json({ 
-      message: "Project not found" 
-    });
-
-    if (project.scrumMaster.toString() !== scrumMasterId) {
-      return res.status(403).json({ 
-        message: "Only the scrumMaster can assign tasks" 
+    if (!project)
+      return res.status(404).json({
+        message: "Project not found",
       });
-    }
 
     const group = await Cluster.findById(project.cluster);
-    if (!group) return res.status(404).json({ 
-      message: "Group not found" 
-    });
+    if (!group)
+      return res.status(404).json({
+        message: "Group not found",
+      });
 
     const isMember = group.integrantes.some(
       (i) => i.usuario.toString() === assignedTo
     );
     if (!isMember) {
-      return res.status(400).json({ 
-        message: "Assigned user is not in the group" 
+      return res.status(400).json({
+        message: "Assigned user is not in the group",
       });
     }
 
-    const task = await Task.create({ title, description, sprint, assignedTo, attachments, project: project._id });
+    const task = await Task.create({
+      title,
+      description,
+      sprint,
+      assignedTo,
+      attachments,
+      project: project._id,
+    });
     await Sprint.findByIdAndUpdate(sprint, { $push: { task: task._id } });
+
+    await createNotification({
+      user: assignedTo,
+      title: `Nueva tarea asignada: ${title}`,
+      message: `Se te ha asignado una nueva tarea en el sprint ${sprintDoc.number} del proyecto "${project.title}".`,
+      relatedTo: task._id,
+      relatedType: "Task",
+    });
 
     return res.status(200).json({
       message: "Task created successfully",
-      task: task
+      task: task,
     });
   } catch (error) {
     res.status(500).json({
       message: "Error adding task",
-      error: error.message
+      error: error.message,
     });
   }
 };
@@ -61,19 +74,16 @@ export const listTasks = async (req, res) => {
 
     const tasks = await Task.find(filter);
 
-    return res.status(200).json({ 
-      tasks 
+    return res.status(200).json({
+      tasks,
     });
-
   } catch (err) {
-
-    return res.status(500).json({ 
-      message: "Error listing tasks", 
-      error: err.message 
+    return res.status(500).json({
+      message: "Error listing tasks",
+      error: err.message,
     });
   }
 };
-
 
 export const updateTask = async (req, res) => {
   try {
@@ -87,13 +97,22 @@ export const updateTask = async (req, res) => {
         message: "task not found",
       });
     }
+    const sprintDoc = await Sprint.findById(task.sprint);
+    const project = await Project.findById(task.project);
+
+    await createNotification({
+      user: task.assignedTo,
+      title: `Actualización en la tarea: ${task.title}`,
+      message: `La tarea "${task.title}" del sprint ${sprintDoc?.number} en el proyecto "${project?.title}" ha sido actualizada.`,
+      relatedTo: task._id,
+      relatedType: "Task",
+    });
 
     return res.status(200).json({
       success: true,
       message: "Task updated successfully",
       task: task,
     });
-
   } catch (err) {
     return res.status(500).json({
       success: false,
@@ -102,7 +121,6 @@ export const updateTask = async (req, res) => {
     });
   }
 };
-
 
 export const deleteService = async (req, res) => {
   try {
@@ -139,8 +157,8 @@ export const reassignTask = async (req, res) => {
       path: "sprint",
       populate: {
         path: "project",
-        populate: { path: "cluster" }
-      }
+        populate: { path: "cluster" },
+      },
     });
 
     if (!task) {
@@ -158,14 +176,22 @@ export const reassignTask = async (req, res) => {
     task.assignedTo = newUserId;
     await task.save();
 
+    await createNotification({
+      user: newUserId,
+      title: `Nueva tarea asignada: ${task.title}`,
+      message: `Se te ha reasignado la tarea "${task.title}" en el proyecto "${task.sprint.project.title}".`,
+      relatedTo: task._id,
+      relatedType: "Task",
+    });
+
     return res.status(200).json({
       message: "Task reassigned successfully",
-      task
+      task,
     });
   } catch (err) {
     return res.status(500).json({
       message: "Error reassigning task",
-      error: err.message
+      error: err.message,
     });
   }
 };
@@ -182,25 +208,34 @@ export const markTaskUrgent = async (req, res) => {
     task.isUrgent = true;
     await task.save();
 
+    await createNotification({
+      user: task.assignedTo,
+      title: `Tarea marcada como urgente: ${task.title}`,
+      message: `La tarea "${task.title}" ha sido marcada como urgente. Por favor, dale prioridad.`,
+      relatedTo: task._id,
+      relatedType: "Task",
+    });
+
     return res.status(200).json({
       message: "Tarea marcada como urgente",
-      task
+      task,
     });
   } catch (err) {
     return res.status(500).json({
       message: "Error al marcar como urgente",
-      error: err.message
+      error: err.message,
     });
   }
 };
-
 
 export const setTaskTags = async (req, res) => {
   try {
     const { taskId, tags } = req.body;
 
     if (!Array.isArray(tags)) {
-      return res.status(400).json({ message: "Tags debe ser un array de strings" });
+      return res
+        .status(400)
+        .json({ message: "Tags debe ser un array de strings" });
     }
 
     const task = await Task.findById(taskId);
@@ -211,14 +246,24 @@ export const setTaskTags = async (req, res) => {
     task.tags = tags;
     await task.save();
 
+    await createNotification({
+      user: task.assignedTo,
+      title: ` Etiquetas actualizadas en la tarea: ${task.title}`,
+      message: `Se han actualizado las etiquetas de la tarea "${
+        task.title
+      }". Nuevas etiquetas: ${tags.join(", ")}`,
+      relatedTo: task._id,
+      relatedType: "Task",
+    });
+
     return res.status(200).json({
       message: "Etiquetas asignadas correctamente",
-      task
+      task,
     });
   } catch (err) {
     return res.status(500).json({
       message: "Error al asignar etiquetas",
-      error: err.message
+      error: err.message,
     });
   }
 };
@@ -229,7 +274,7 @@ export const addTaskAttachments = async (req, res) => {
     const files = req.files;
 
     const task = await Task.findById(taskId);
-    
+
     if (!task) {
       return res.status(404).json({
         success: false,
@@ -238,14 +283,14 @@ export const addTaskAttachments = async (req, res) => {
     }
 
     if (files && files.length > 0) {
-      const newAttachments = files.map(file => file.filename);
+      const newAttachments = files.map((file) => file.filename);
       task.attachments = [...task.attachments, ...newAttachments];
 
       await task.save();
     }
 
     const taskObj = task.toObject();
-    taskObj.attachmentUrls = task.attachments.map(filename => 
+    taskObj.attachmentUrls = task.attachments.map((filename) =>
       cloudinary.v2.url(filename)
     );
 
@@ -263,16 +308,15 @@ export const addTaskAttachments = async (req, res) => {
   }
 };
 
-
 export const deleteTaskAttachments = async (req, res) => {
   try {
     const { taskId } = req.params;
-    let { filenames } = req.body; 
+    let { filenames } = req.body;
 
     filenames = Array.isArray(filenames) ? filenames : [filenames];
 
     const task = await Task.findById(taskId);
-    
+
     if (!task) {
       return res.status(404).json({
         success: false,
@@ -284,7 +328,7 @@ export const deleteTaskAttachments = async (req, res) => {
       if (task.attachments.includes(filename)) {
         await cloudinary.v2.uploader.destroy(filename);
         task.attachments = task.attachments.filter(
-          attachment => attachment !== filename
+          (attachment) => attachment !== filename
         );
       }
     }
@@ -292,7 +336,7 @@ export const deleteTaskAttachments = async (req, res) => {
     await task.save();
 
     const taskObj = task.toObject();
-    taskObj.attachmentUrls = task.attachments.map(filename => 
+    taskObj.attachmentUrls = task.attachments.map((filename) =>
       cloudinary.v2.url(filename)
     );
 

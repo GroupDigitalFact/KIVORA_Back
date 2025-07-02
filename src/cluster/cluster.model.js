@@ -18,6 +18,7 @@ const ClusterSchema = new Schema({
     {
       usuario: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
       rol: { type: String, enum: ["admin", "usuario"], default: "usuario" },
+      state:{type: Boolean,default: false}
     },
   ],
   propietario: {
