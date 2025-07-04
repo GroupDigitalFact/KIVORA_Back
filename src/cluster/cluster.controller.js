@@ -140,7 +140,7 @@ export const editarDescripcion = async (req, res) => {
 // Listar grupos
 export const listarGrupos = async (req, res) => {
   try {
-    const { usuario } = req.body;
+    const { usuario } = req.params;
 
     const user = await User.findOne({
       $or: [{ email: usuario }, { username: usuario }],
@@ -165,3 +165,26 @@ export const listarGrupos = async (req, res) => {
     });
   }
 };
+
+// Busca un grupo en específico por ID
+export const buscarGrupoId = async (req, res) => {
+    try {
+      const { grupoId } = req.params;
+
+      const grupo = await Cluster.findById(grupoId).populate("integrantes.usuario");
+
+      if (!grupo) {
+        return res.status(500).json({ message: "Grupo no encontrado" });
+      }
+
+      return res.status(200).json({
+        message: "Grupo encontrado exitosamente",
+        grupo: grupo,
+      });
+    } catch (err) {
+      return res.status(500).json({
+        message: "Error al buscar grupo",
+        error: err.message,
+      });
+    }
+  };
