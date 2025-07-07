@@ -40,12 +40,6 @@ const ProjectSchema = new Schema({
     ref: "User",
     required: [true, "Product owner is required"]
   },
-  developers: [
-    {
-      type: Schema.Types.ObjectId,
-      ref: "User"
-    }
-  ],
   sprints: [
     {
       idSprint:{

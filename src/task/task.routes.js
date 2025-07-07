@@ -1,10 +1,10 @@
 import { Router } from "express";
 import {addTask,listTasks,updateTask,deleteService,reassignTask  ,markTaskUrgent, addTaskAttachments,  deleteTaskAttachments, setTaskTags} from "./task.controller.js";
 import { uploadTaskFiles } from "../middlewares/multer-uploads.js";
-import{ authMiddleware } from "../middlewares/auth-validate.js";
+import{ authMiddleware, authScrumMasterMiddleware } from "../middlewares/auth-validate.js";
 const router = Router();
 
-router.post("/addTask", uploadTaskFiles.array("attachments", 10), addTask);
+router.post("/addTask", uploadTaskFiles.array("attachments", 10), authScrumMasterMiddleware, addTask);
 
 router.post("/listTasks", listTasks);
 
