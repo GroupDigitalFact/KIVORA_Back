@@ -84,7 +84,6 @@ export const getProjects = async (req, res) => {
     const projects = await Project.find({ cluster: idGroup, state: true })
       .populate("scrumMaster", "name surname username")
       .populate("productOwner", "name surname username")
-      .populate("developers", "name surname username")
       .populate("cluster", "name");
 
     if (!projects || projects.length === 0) {
