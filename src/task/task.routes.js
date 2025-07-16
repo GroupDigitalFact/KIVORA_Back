@@ -1,12 +1,16 @@
 import { Router } from "express";
-import {addTask,listTasks,updateTask,deleteService,reassignTask  ,markTaskUrgent, addTaskAttachments,  deleteTaskAttachments, setTaskTags} from "./task.controller.js";
+import { authMiddleware, authScrumMasterMiddleware } from "../middlewares/auth-validate.js";
 import { uploadTaskFiles } from "../middlewares/multer-uploads.js";
-import{ authMiddleware, authScrumMasterMiddleware } from "../middlewares/auth-validate.js";
+import { addTask, addTaskAttachments, deleteService, deleteTaskAttachments, getMyTasks, listTasks, markTaskUrgent, reassignTask, setTaskTags, updateTask, updateTaskState } from "./task.controller.js";
 const router = Router();
 
 router.post("/addTask", uploadTaskFiles.array("attachments", 10), authScrumMasterMiddleware, addTask);
 
 router.post("/listTasks", listTasks);
+//Pa devyn
+router.get("/myTasks", authMiddleware, getMyTasks);
+
+router.put("/updateTaskState/:id", authScrumMasterMiddleware, updateTaskState);
 
 router.put("/updateTask", updateTask);
 
