@@ -93,10 +93,23 @@ export const createSprint = async (req, res) => {
 export const getSprints = async (req, res) => {
   try {
     const { projectId } = req.params;
+
     const sprints = await Sprint.find({
       project: projectId,
       status: true,
-    }).populate("project");
+    })
+      .populate("project") 
+      .populate({
+        path: "task", 
+          match: { 
+            project: projectId,
+            state: { $ne: "deleted" } 
+          },        
+          populate: {
+          path: "assignedTo", 
+          select: "name email", 
+        },
+      });
 
     return res.status(200).json({
       message: "Sprints fetched successfully",
@@ -376,3 +389,4 @@ export const removeBacklogFromSprint = async (req, res) => {
     });
   }
 };
+

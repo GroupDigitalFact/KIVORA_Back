@@ -1,9 +1,9 @@
-import cloudinary from "cloudinary";
-import Cluster from "../cluster/cluster.model.js";
-import { createNotification } from "../helpers/notifications-validators.js";
 import Project from "../project/project.model.js";
 import Sprint from "../sprint/sprint.model.js";
+import Cluster from "../cluster/cluster.model.js";
 import Task from "./task.model.js";
+import cloudinary from "cloudinary";
+import { createNotification } from "../helpers/notifications-validators.js";
 
 export const addTask = async (req, res) => {
   try {
@@ -87,6 +87,7 @@ export const listTasks = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   try {
+    const { id } = req.body;  
     const data = req.body;
 
     const task = await Task.findByIdAndUpdate(id, data, { new: true });
@@ -94,9 +95,10 @@ export const updateTask = async (req, res) => {
     if (!task) {
       return res.status(404).json({
         success: false,
-        message: "task not found",
+        message: "Task not found",
       });
     }
+
     const sprintDoc = await Sprint.findById(task.sprint);
     const project = await Project.findById(task.project);
 
@@ -124,30 +126,31 @@ export const updateTask = async (req, res) => {
 
 export const deleteService = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;  
 
     const service = await Task.findByIdAndUpdate(
       id,
-      { estado: true },
-      { new: true }
+      { state: "deleted" },  
     );
+
     if (!service) {
       return res.status(404).json({
-        message: "service not found",
+        message: "Service not found",
       });
     }
 
     return res.status(200).json({
-      message: "Service deleted success fully",
+      message: "Service deleted successfully",
     });
   } catch (err) {
     return res.status(500).json({
-      succes: false,
+      success: false,
       message: "Error deleting service",
       error: err.message,
     });
   }
 };
+
 
 export const reassignTask = async (req, res) => {
   try {
