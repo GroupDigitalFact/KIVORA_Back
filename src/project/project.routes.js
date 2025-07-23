@@ -3,7 +3,8 @@ import {
   addProject,
   getProjects,
   updateProject,
-  deleteProject
+  deleteProject,
+  listUserProjects
 } from "./project.controller.js";
 import { authMiddleware } from "../middlewares/auth-validate.js"
 
@@ -17,5 +18,7 @@ router.get("/getProjects/:idGroup", authMiddleware, getProjects);
 router.put("/updateProject/:idProject", updateProject);
 
 router.delete("/deleteProject/:idProject", deleteProject);
+
+router.get("/listUserProjects", authMiddleware, listUserProjects);
 
 export default router;

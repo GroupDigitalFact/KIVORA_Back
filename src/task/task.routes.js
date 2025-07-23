@@ -1,20 +1,20 @@
 import { Router } from "express";
-import { authMiddleware, authScrumMasterMiddleware } from "../middlewares/auth-validate.js";
+import {addTask,listTasksSprint,updateTask,deleteTask,reassignTask,listTasksUser, listTasksProject ,markTaskUrgent, addTaskAttachments, updateState, deleteTaskAttachments, setTaskTags} from "./task.controller.js";
 import { uploadTaskFiles } from "../middlewares/multer-uploads.js";
-import { addTask, addTaskAttachments, deleteService, deleteTaskAttachments, getMyTasks, listTasks, markTaskUrgent, reassignTask, setTaskTags, updateTask, updateTaskState } from "./task.controller.js";
+import{ authMiddleware, authScrumMasterMiddleware } from "../middlewares/auth-validate.js";
 const router = Router();
 
 router.post("/addTask", uploadTaskFiles.array("attachments", 10), authScrumMasterMiddleware, addTask);
 
-router.post("/listTasks", listTasks);
-//Pa devyn
-router.get("/myTasks", authMiddleware, getMyTasks);
+router.get("/listTasks/:sprint", listTasksSprint);
 
-router.put("/updateTaskState/:id", authScrumMasterMiddleware, updateTaskState);
+router.get("/listTasksProject/:project", listTasksProject);
 
-router.put("/updateTask", updateTask);
+router.get("/listTasksUser", authMiddleware, listTasksUser);
 
-router.delete("/deleteTask", deleteService);
+router.put("/updateTask/:id", updateTask);
+
+router.delete("/deleteTask", deleteTask);
 
 router.put("/reassignTask", reassignTask);
 
@@ -34,6 +34,8 @@ router.delete(
   authMiddleware,
   deleteTaskAttachments
 );
+
+router.put("/updateStateTask/:id", updateState);
 
 
 export default router;

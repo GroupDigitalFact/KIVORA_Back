@@ -20,7 +20,7 @@ const TaskSchema = new Schema(
     project: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Project",
-      required: [true, "Project is required"]
+      required: [true, "Project is required"],
     },
     assignedTo: {
       type: mongoose.Schema.Types.ObjectId,
@@ -37,12 +37,16 @@ const TaskSchema = new Schema(
       default: false,
     },
     attachments: {
-      type: [String], 
+      type: [String],
       default: [],
     },
     tags: {
       type: [String],
       default: [],
+    },
+    status: {
+      type: Boolean,
+      default: true,
     },
   },
   {
