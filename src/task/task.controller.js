@@ -145,7 +145,8 @@ export const listTasksUser = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;  
+
     const data = req.body;
 
     const task = await Task.findByIdAndUpdate(id, data, { new: true });
@@ -153,9 +154,10 @@ export const updateTask = async (req, res) => {
     if (!task) {
       return res.status(404).json({
         success: false,
-        message: "task not found",
+        message: "Task not found",
       });
     }
+
     const sprintDoc = await Sprint.findById(task.sprint);
     const project = await Project.findById(task.project);
 
@@ -183,13 +185,13 @@ export const updateTask = async (req, res) => {
 
 export const deleteTask = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { id } = req.body;  
 
     const service = await Task.findByIdAndUpdate(
       id,
       { status: false },
-      { new: true }
-    );
+      { new: true });
+
     if (!service) {
       return res.status(404).json({
         message: "Task not found",
@@ -203,10 +205,10 @@ export const deleteTask = async (req, res) => {
     return res.status(500).json({
       succes: false,
       message: "Error deleting task",
-      error: err.message,
     });
-  }
+  } 
 };
+
 
 export const reassignTask = async (req, res) => {
   try {
@@ -414,6 +416,7 @@ export const deleteTaskAttachments = async (req, res) => {
   }
 };
 
+
 export const updateState = async (req, res) => {
   try{
     const { id } = req.params;
@@ -446,3 +449,64 @@ export const updateState = async (req, res) => {
     });
   }
 }
+
+//Pa devyn
+
+export const getMyTasks = async (req, res) => {
+  try {
+    const userId = req.user._id;
+
+    const tasks = await Task.find({ assignedTo: userId });
+
+    return res.status(200).json({
+      success: true,
+      tasks,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Error al obtener las tareas del usuario",
+      error: err.message,
+    });
+  }
+};
+
+
+export const updateTaskState = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { state } = req.body;
+
+    const allowedStates = ["Late", "In Progress", "In Review", "finalized"];
+    if (!allowedStates.includes(state)) {
+      return res.status(400).json({
+        success: false,
+        message: `El estado debe ser uno de: ${allowedStates.join(", ")}`,
+      });
+    }
+
+    const task = await Task.findById(id);
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Tarea no encontrada",
+      });
+    }
+
+    task.state = state;
+    await task.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Estado de la tarea actualizado correctamente",
+      task,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Error al actualizar el estado de la tarea",
+      error: err.message,
+    });
+  }
+};
+
