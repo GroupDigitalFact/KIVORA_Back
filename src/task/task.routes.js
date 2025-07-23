@@ -1,16 +1,20 @@
 import { Router } from "express";
-import {addTask,listTasks,updateTask,deleteService,reassignTask  ,markTaskUrgent, addTaskAttachments,  deleteTaskAttachments, setTaskTags} from "./task.controller.js";
+import {addTask,listTasksSprint,updateTask,deleteTask,reassignTask,listTasksUser, listTasksProject ,markTaskUrgent, addTaskAttachments, updateState, deleteTaskAttachments, setTaskTags} from "./task.controller.js";
 import { uploadTaskFiles } from "../middlewares/multer-uploads.js";
 import{ authMiddleware, authScrumMasterMiddleware } from "../middlewares/auth-validate.js";
 const router = Router();
 
 router.post("/addTask", uploadTaskFiles.array("attachments", 10), authScrumMasterMiddleware, addTask);
 
-router.post("/listTasks", listTasks);
+router.get("/listTasks/:sprint", listTasksSprint);
 
-router.put("/updateTask", updateTask);
+router.get("/listTasksProject/:project", listTasksProject);
 
-router.delete("/deleteTask", deleteService);
+router.get("/listTasksUser", authMiddleware, listTasksUser);
+
+router.put("/updateTask/:id", updateTask);
+
+router.delete("/deleteTask", deleteTask);
 
 router.put("/reassignTask", reassignTask);
 
@@ -30,6 +34,8 @@ router.delete(
   authMiddleware,
   deleteTaskAttachments
 );
+
+router.put("/updateStateTask/:id", updateState);
 
 
 export default router;

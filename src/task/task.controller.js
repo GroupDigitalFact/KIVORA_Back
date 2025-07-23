@@ -68,12 +68,70 @@ export const addTask = async (req, res) => {
   }
 };
 
-export const listTasks = async (req, res) => {
+export const listTasksSprint = async (req, res) => {
   try {
-    const filter = req.body || {};
+    const {sprint} = req.params;
 
-    const tasks = await Task.find(filter);
+    const tasks = await Task.find({ sprint, status: true })
+      .populate("sprint", "number")
+      .populate("project", "title")
+      .populate("assignedTo", "name email");
 
+    if(!tasks){
+      return res.status(404).json({
+        message: "No tasks found for this sprint",
+      });
+    }
+    return res.status(200).json({
+      tasks,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error listing tasks",
+      error: err.message,
+    });
+  }
+};
+
+export const listTasksProject = async (req, res) => {
+  try {
+    const {project} = req.params;
+
+    const tasks = await Task.find({ project, status: true })
+      .populate("sprint", "number")
+      .populate("project", "title")
+      .populate("assignedTo", "name email");
+
+    if(!tasks){
+      return res.status(404).json({
+        message: "No tasks found for this sprint",
+      });
+    }
+    return res.status(200).json({
+      tasks,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error listing tasks",
+      error: err.message,
+    });
+  }
+};
+
+export const listTasksUser = async (req, res) => {
+  try {
+    const id = req.usuario._id;
+
+    const tasks = await Task.find({ assignedTo: id, status: true })
+      .populate("sprint", "number")
+      .populate("project", "title")
+      .populate("assignedTo", "name email");
+
+    if(!tasks){
+      return res.status(404).json({
+        message: "No tasks found for this sprint",
+      });
+    }
     return res.status(200).json({
       tasks,
     });
@@ -87,6 +145,7 @@ export const listTasks = async (req, res) => {
 
 export const updateTask = async (req, res) => {
   try {
+    const { id } = req.params;
     const data = req.body;
 
     const task = await Task.findByIdAndUpdate(id, data, { new: true });
@@ -122,28 +181,28 @@ export const updateTask = async (req, res) => {
   }
 };
 
-export const deleteService = async (req, res) => {
+export const deleteTask = async (req, res) => {
   try {
     const { id } = req.params;
 
     const service = await Task.findByIdAndUpdate(
       id,
-      { estado: true },
+      { status: false },
       { new: true }
     );
     if (!service) {
       return res.status(404).json({
-        message: "service not found",
+        message: "Task not found",
       });
     }
 
     return res.status(200).json({
-      message: "Service deleted success fully",
+      message: "Task deleted success fully",
     });
   } catch (err) {
     return res.status(500).json({
       succes: false,
-      message: "Error deleting service",
+      message: "Error deleting task",
       error: err.message,
     });
   }
@@ -285,6 +344,7 @@ export const addTaskAttachments = async (req, res) => {
     if (files && files.length > 0) {
       const newAttachments = files.map((file) => file.filename);
       task.attachments = [...task.attachments, ...newAttachments];
+      task.state ="In Review"
 
       await task.save();
     }
@@ -353,3 +413,36 @@ export const deleteTaskAttachments = async (req, res) => {
     });
   }
 };
+
+export const updateState = async (req, res) => {
+  try{
+    const { id } = req.params;
+    const { state } = req.body;
+
+    const task = await Task.findById(id);
+
+    task.state = state;
+    await task.save();
+
+
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: "Task state updated successfully",
+      task: task,
+    });
+    
+  }catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Error updating task state",
+      error: err.message,
+    });
+  }
+}

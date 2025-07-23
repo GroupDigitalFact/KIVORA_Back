@@ -51,13 +51,14 @@ export const login = async (req, res) => {
         }
 
         const token = await generateJWT(user.id)
+        const id = user._id;
 
         return res.status(200).json({
             message: "Login successful",
             userDetails: {
+                user: id,
                 token: token,
                 profilePicture: user.profilePicture,
-                role: user.role
             }
         })
     }catch(err){

@@ -173,3 +173,40 @@ export const deleteProject = async (req, res) => {
     });
   }
 };
+
+export const listUserProjects = async (req, res) => {
+  try {
+    const userId = req.usuario._id;
+
+    const userClusters = await Cluster.find({
+      integrantes: { $elemMatch: { usuario: userId } },
+    });
+
+    const clusterIds = userClusters.map((cluster) => cluster._id);
+
+    const projects = await Project.find({
+      cluster: { $in: clusterIds },
+      state: true,
+    })
+      .populate("scrumMaster", "name surname username")
+      .populate("productOwner", "name surname username")
+      .populate("cluster", "nombre");
+
+    if (!projects) {
+      return res.status(404).json({
+        message: "No projects found for this user",
+      });
+    }
+
+    return res.status(200).json({
+      message: "User projects fetched successfully",
+      projects,
+    });
+
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching user projects",
+      error: error.message,
+    });
+  }
+};

@@ -7,7 +7,9 @@ import {
   updateImage,
   deleteImage,
   modificarContraseña,
-  getMyUser
+  getMyUser,
+  checkAuth,
+  getMyContacts
 } from "./user.controller.js";
 import { validatorUpdateUser } from "../middlewares/user-validate.js";
 import { authMiddleware } from "../middlewares/auth-validate.js";
@@ -31,6 +33,10 @@ router.delete("/profilePictureDelete", authMiddleware, deleteImage);
 
 router.patch("/changePassword", authMiddleware, modificarContraseña);
 
-router.get("/getMyUser", authMiddleware, getMyUser)
+router.get("/getMyUser", authMiddleware, getMyUser);
+
+router.get("/check", authMiddleware, checkAuth);
+
+router.get("/getMyContacts", authMiddleware, getMyContacts);
 
 export default router;

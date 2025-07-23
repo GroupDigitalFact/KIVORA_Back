@@ -239,3 +239,39 @@ export const getMyUser = async (req, res) => {
     });
   }
 };
+
+
+export const checkAuth = (req, res) =>{
+  res.status(200).json({
+    success:true,
+    user: req.usuario
+  });
+}
+
+export const getMyContacts = async (req, res) => {
+  try {
+    const id = req.usuario._id;
+
+    const user = await User.findById(id)
+      .select("contacts")
+      .populate("contacts.user", "name surname username email profilePicture"); 
+
+    if (!user || !user.contacts) {
+      return res.status(404).json({
+        success: false,
+        message: "No se encontraron contactos para este usuario.",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      contacts: user.contacts,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      success: false,
+      message: "Error al obtener los contactos",
+      error: err.message,
+    });
+  }
+};
