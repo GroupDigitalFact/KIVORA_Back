@@ -41,6 +41,11 @@ const eventSchema = new Schema({
     type: Boolean,
     default: false,
   },
+  statusEvent:{
+    type: String,
+    enum: ["Pendiente", "En Curso", "Finalizado", "Cancelado"],
+    default: "Pendiente",
+  },
   status: {
     type: Boolean,
     default: true,
