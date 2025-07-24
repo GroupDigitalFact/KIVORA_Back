@@ -1,6 +1,7 @@
 import User from "./user.model.js";
 import cloudinary from "cloudinary";
 import { hash, verify } from "argon2"
+import { sendEmail } from "../helpers/sendEmail.js";
 
 
 export const getUser = async (req, res) => {
@@ -280,7 +281,7 @@ export const updatePassword = async (req, res) => {
   try {
       const { email, nuevaContraseña } = req.body;
 
-      const user = await User.findOne({ correo: email });
+      const user = await User.findOne({ email: email });
       
       if (!user) {
           return res.status(404).json({
@@ -387,10 +388,9 @@ export const updatePassword = async (req, res) => {
               Si no realizaste este cambio, por favor contacta a nuestro equipo de soporte inmediatamente.
             </p>
 
-            <a href="https://www.bancoalbora.com/iniciar-sesion" class="cta">Iniciar Sesión</a>
 
             <div class="footer">
-              © ${new Date().getFullYear()} Banco Albora. Todos los derechos reservados.
+              © ${new Date().getFullYear()} Kivora. Todos los derechos reservados.
             </div>
           </div>
         </body>
@@ -399,7 +399,7 @@ export const updatePassword = async (req, res) => {
 
       await sendEmail({
           to: entity.correo,
-          subject: 'Contraseña actualizada - Banco Albora',
+          subject: 'Contraseña actualizada - Kivora',
           html: htmlContent
       });
 
@@ -408,7 +408,7 @@ export const updatePassword = async (req, res) => {
           message: 'Contraseña actualizada exitosamente',
           tipo: entityType,
           datos: {
-              nombre: entity.nombre || entity.nombreEmpresa,
+              nombre: entity.nombre,
               correo: entity.correo,
               fechaActualizacion: new Date()
           }

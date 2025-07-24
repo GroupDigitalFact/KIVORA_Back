@@ -159,6 +159,6 @@ export const generateCodigo = async (req, res) => {
   } catch (err) {
     console.log(process.env.SENDGRID_API_KEY)
     console.error("Error al enviar el correo:", err);
-    res.status(500).json({ error: "Error enviando el correo" });
+    res.status(500).json({ error: "Error enviando el correo", err });
   }
 };

@@ -9,7 +9,8 @@ import {
   modificarContraseña,
   getMyUser,
   checkAuth,
-  getMyContacts
+  getMyContacts,
+  updatePassword
 } from "./user.controller.js";
 import { validatorUpdateUser } from "../middlewares/user-validate.js";
 import { authMiddleware } from "../middlewares/auth-validate.js";
@@ -38,5 +39,7 @@ router.get("/getMyUser", authMiddleware, getMyUser);
 router.get("/check", authMiddleware, checkAuth);
 
 router.get("/getMyContacts", authMiddleware, getMyContacts);
+
+router.put("/updatePassword", updatePassword)
 
 export default router;
