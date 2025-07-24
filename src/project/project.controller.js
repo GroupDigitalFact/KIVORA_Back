@@ -1,5 +1,9 @@
 import Project from "./project.model.js";
 import Cluster from "../cluster/cluster.model.js";
+import User from "../user/user.model.js";
+import Task from "../task/task.model.js";
+import Event from "../event/event.model.js";
+import Sprint from "../sprint/sprint.model.js";
 import { createNotification } from "../helpers/notifications-validators.js";
 
 export const addProject = async (req, res) => {
@@ -207,6 +211,90 @@ export const listUserProjects = async (req, res) => {
     res.status(500).json({
       message: "Error fetching user projects",
       error: error.message,
+    });
+  }
+};
+
+export const getProjectStats = async (req, res) => {
+  try {
+    const { projectId } = req.params;
+
+    const project = await Project.findById(projectId).populate("cluster");
+    if (!project) return res.status(404).json({ message: "Proyecto no encontrado" });
+
+    const cluster = await Cluster.findById(project.cluster._id).populate("integrantes.usuario");
+    if (!cluster) return res.status(404).json({ message: "Grupo no encontrado para el proyecto" });
+
+    const sprints = await Sprint.find({ project: projectId });
+    const sprintIds = sprints.map(s => s._id);
+
+    const tareas = await Task.find({ sprint: { $in: sprintIds }, status: true })
+      .populate("assignedTo", "name email")
+      .populate("sprint", "number")
+      .populate("project", "title");
+
+    const eventos = await Event.find({ sprint: { $in: sprintIds }, status: true })
+      .populate("participantes", "name email")
+      .populate("asistencia.usuario", "name email")
+      .populate({ path: "sprint", populate: { path: "project", select: "title" } });
+
+    const usuariosStats = cluster.integrantes.map(({ usuario }) => {
+      const userId = usuario._id.toString();
+      const tareasUsuario = tareas.filter(t => t.assignedTo && t.assignedTo._id.toString() === userId);
+
+      const entregadas = tareasUsuario.filter(t => t.attachments.length > 0);
+      const pendientes = tareasUsuario.filter(t => t.attachments.length === 0);
+
+      const tareasPorSprint = {};
+      tareasUsuario.forEach(t => {
+        const key = `Sprint ${t.sprint.number}`;
+        if (!tareasPorSprint[key]) tareasPorSprint[key] = [];
+        tareasPorSprint[key].push({
+          titulo: t.title,
+          estado: t.attachments.length > 0 ? "Entregada" : "Pendiente",
+          proyecto: t.project.title
+        });
+      });
+
+      const asistencias = eventos.filter(ev => ev.asistencia.some(a => a.usuario && a.usuario._id.toString() === userId && a.presente)).length;
+      const totalEventos = eventos.filter(ev => ev.participantes.some(p => p._id.toString() === userId)).length;
+
+      return {
+        usuario: { id: userId, nombre: usuario.name, email: usuario.email },
+        totalTareas: tareasUsuario.length,
+        entregadas: entregadas.length,
+        pendientes: pendientes.length,
+        detallePorSprint: tareasPorSprint,
+        eventosParticipados: totalEventos,
+        asistencias,
+        porcentajeAsistencia: totalEventos > 0 ? Math.round((asistencias / totalEventos) * 100) : 0
+      };
+    });
+
+    const totalTareas = tareas.length;
+    const tareasEntregadas = tareas.filter(t => t.attachments.length > 0).length;
+    const tareasPendientes = totalTareas - tareasEntregadas;
+
+    const informeGeneral = {
+      totalTareas,
+      tareasEntregadas,
+      tareasPendientes,
+      porcentajeEntregadas: totalTareas > 0 ? Math.round((tareasEntregadas / totalTareas) * 100) : 0,
+      sprints: sprints.length,
+      integrantes: cluster.integrantes.length,
+      totalEventos: eventos.length
+    };
+
+    return res.status(200).json({
+      mensaje: "Estadísticas del proyecto generadas correctamente",
+      informeGeneral,
+      estadisticasUsuarios: usuariosStats
+    });
+
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error generando estadísticas del proyecto",
+      error: err.message
     });
   }
 };
