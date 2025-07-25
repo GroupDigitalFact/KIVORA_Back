@@ -294,14 +294,14 @@ export const updatePassword = async (req, res) => {
 
       let entity, entityType;
       if (user) {
-          user.contraseña = encryptPassword;
+          user.password = encryptPassword;
           await user.save();
           entity = user;
           entityType = 'usuario';
       }
 
-      const nombre = entity.nombre || `${entity.nombre} ${entity.apellido}`;
-      const nombreUsuario = entity.nombreUsuario || entity.correo;
+      const nombre = entity.name || `${entity.name} ${entity.surname}`;
+      const nombreUsuario = entity.username || entity.email;
 
       const htmlContent = `
       <!DOCTYPE html>
@@ -380,7 +380,7 @@ export const updatePassword = async (req, res) => {
 
             <div class="info">
               <p><strong>👤 ${entityType === 'usuario' ? 'Usuario' : 'Nombre'}:</strong> ${nombreUsuario}</p>
-              <p><strong>📧 Correo:</strong> ${entity.correo}</p>
+              <p><strong>📧 Correo:</strong> ${entity.email}</p>
               <p><strong>🕒 Fecha de actualización:</strong> ${new Date().toLocaleString()}</p>
             </div>
 
@@ -398,7 +398,7 @@ export const updatePassword = async (req, res) => {
       `;
 
       await sendEmail({
-          to: entity.correo,
+          to: email,
           subject: 'Contraseña actualizada - Kivora',
           html: htmlContent
       });
