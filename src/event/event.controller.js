@@ -23,18 +23,6 @@ export const createEvent = async (req, res) => {
     });
     }
 
-    const userId = req.body.userId; 
-    const isMember = grupo.integrantes.some(i => i.usuario && i.usuario._id.toString() === userId);
-    if (!isMember) return res.status(403).json({ 
-        message: "No perteneces al grupo" 
-    });
-
-    if (sprintDoc.project.scrumMaster.toString() !== userId) {
-      return res.status(403).json({ 
-        message: "Solo el Scrum Master puede crear eventos" 
-    });
-    }
-
     const event = await Event.create({
       tipoEvento,
       descripcion,
@@ -56,7 +44,6 @@ export const createEvent = async (req, res) => {
   }
 };
 
-
 export const listEvents = async (req, res) => {
   try {
     const { sprintId, tipoEvento, fecha } = req.query;
@@ -71,30 +58,35 @@ export const listEvents = async (req, res) => {
       filter.fecha = { $gte: start, $lte: end };
     }
 
-    const userId = req.body.userId;
-    if (!userId) return res.status(400).json({ 
-        message: "userId requerido" 
-    });
+    const userId = req.usuario?._id;
+    if (!userId) {
+      return res.status(401).json({ message: "Usuario no autenticado" });
+    }
 
     const events = await Event.find(filter)
       .populate({
         path: "sprint",
-        populate: { path: "project", populate: { path: "cluster", populate: { path: "integrantes.usuario" } } }
+        populate: {
+          path: "project",
+          populate: {
+            path: "cluster",
+            populate: { path: "integrantes.usuario" }
+          }
+        }
       })
-      .populate("participantes");
+      .populate("participantes", "name email");
 
-    const filtered = events.filter(ev => {
-      const cluster = ev.sprint.project.cluster;
-      return cluster && cluster.integrantes && cluster.integrantes.some(i => i.usuario && i.usuario._id.toString() === userId);
+    const filtered = events.filter(evento => {
+      const cluster = evento?.sprint?.project?.cluster;
+      return cluster?.integrantes?.some(i => i.usuario?._id?.toString() === userId.toString());
     });
 
-    return res.status(200).json({ 
-        events: filtered 
-    });
+    return res.status(200).json({ events: filtered });
+
   } catch (err) {
-    return res.status(500).json({ 
-        message: "Error listando eventos", 
-        error: err.message 
+    return res.status(500).json({
+      message: "Error listando eventos",
+      error: err.message
     });
   }
 };
@@ -109,10 +101,6 @@ export const updateEvent = async (req, res) => {
       populate: { path: "project" }
     });
     if (!event) return res.status(404).json({ message: "Evento no encontrado" });
-
-    if (event.sprint.project.scrumMaster.toString() !== userId) {
-      return res.status(403).json({ message: "Solo el Scrum Master puede editar" });
-    }
 
     Object.assign(event, data);
     await event.save();
@@ -129,11 +117,10 @@ export const updateEvent = async (req, res) => {
   }
 };
 
-// Eliminar evento (solo scrum master)
 export const deleteEvent = async (req, res) => {
   try {
     const { id } = req.params;
-    const { userId } = req.body;
+    const { userId } = req.query;
 
     const event = await Event.findById(id).populate({
       path: "sprint",
@@ -143,12 +130,6 @@ export const deleteEvent = async (req, res) => {
     if (!event) return res.status(404).json({ 
         message: "Evento no encontrado" 
     });
-
-    if (event.sprint.project.scrumMaster.toString() !== userId) {
-      return res.status(403).json({ 
-        message: "Solo el Scrum Master puede eliminar" 
-    });
-    }
 
     event.status = false;
     await event.save();
@@ -182,12 +163,6 @@ export const markAttendance = async (req, res) => {
     if (!grupo || !grupo.integrantes.some(i => i.usuario && i.usuario._id.toString() === userId)) {
       return res.status(403).json({ 
         message: "No eres miembro del grupo" 
-    });
-    }
-
-    if (!event.participantes.map(u => u.toString()).includes(userId)) {
-      return res.status(403).json({ 
-        message: "No eres participante del evento" 
     });
     }
 
