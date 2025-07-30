@@ -48,6 +48,11 @@ const TaskSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    comment: {
+    type: String,
+    default: "", 
+    maxLength: [500, "Comment cannot exceed 500 characters"], 
+    },
   },
   {
     versionKey: false,

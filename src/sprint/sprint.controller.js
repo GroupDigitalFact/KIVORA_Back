@@ -98,22 +98,38 @@ export const getSprints = async (req, res) => {
       project: projectId,
       status: true,
     })
-      .populate("project") 
+      .populate("project")
       .populate({
-        path: "task", 
-          match: { 
-            project: projectId,
-            state: { $ne: "deleted" } 
-          },        
-          populate: {
-          path: "assignedTo", 
-          select: "name email", 
+        path: "task",
+        match: {
+          project: projectId,
+          status: true,
+        },
+        populate: {
+          path: "assignedTo",
+          select: "name email",
         },
       });
 
+    const sprintsWithAttachments = sprints.map((sprint) => {
+      const sprintObj = sprint.toObject();
+
+      if (Array.isArray(sprintObj.task)) {
+        sprintObj.task = sprintObj.task.map((t) => {
+          const taskObj = { ...t };
+          taskObj.attachmentUrls = (t.attachments || []).map((publicId) =>
+            cloudinary.v2.url(publicId)
+          );
+          return taskObj;
+        });
+      }
+
+      return sprintObj;
+    });
+
     return res.status(200).json({
       message: "Sprints fetched successfully",
-      sprints,
+      sprints: sprintsWithAttachments,
     });
   } catch (err) {
     return res.status(500).json({

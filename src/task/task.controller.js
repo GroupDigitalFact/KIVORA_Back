@@ -5,6 +5,47 @@ import Task from "./task.model.js";
 import cloudinary from "cloudinary";
 import { createNotification } from "../helpers/notifications-validators.js";
 
+export const calificarEntrega = async (req, res) => {
+  try {
+    const { taskId, isAccepted, newComment } = req.body;
+
+    const task = await Task.findById(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Tarea no encontrada" });
+    }
+
+    if (isAccepted) {
+      task.state = "finalized";  
+    } else {
+      task.state = "In Progress"; 
+    }
+
+    if (newComment) {
+      task.comment = newComment;
+    }
+
+    await task.save();
+
+    await createNotification({
+      user: task.assignedTo,  
+      title: `Tu tarea ${task.title} a sido calificada `,
+      message: `La entrega de la tarea "${task.title}" ha cambiado a "${task.state}". ${newComment ? `Comentario adicional: ${newComment}` : ""}`,
+      relatedTo: task._id,  
+      relatedType: "Task",  
+    });
+
+    return res.status(200).json({
+      message: `Tarea ${task.state === "finalized" ? "aceptada" : "rechazada"}`,
+      task,
+    });
+  } catch (err) {
+    return res.status(500).json({
+      message: "Error al calificar la entrega",
+      error: err.message,
+    });
+  }
+};
+
 export const addTask = async (req, res) => {
   try {
     const { title, description, sprint, assignedTo } = req.body;

@@ -4,9 +4,11 @@ export const getMyNotifications = async (req, res) => {
   try {
     const userId = req.usuario._id;
 
-    const notifications = await Notification.find({ user: userId, state: ["Pendiente", "Vista"]}).sort({
-      createdAt: -1,
-    });
+    const notifications = await Notification.find({
+      user: userId,
+      state: ["Pendiente", "Vista"],
+    }).sort({ dateCreation: -1 }); 
+
     const pendingCount = await Notification.countDocuments({
       user: userId,
       state: "Pendiente",

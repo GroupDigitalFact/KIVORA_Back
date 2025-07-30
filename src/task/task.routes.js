@@ -1,5 +1,5 @@
 import { Router } from "express";
-import {addTask,listTasksSprint,updateTask,deleteTask,reassignTask,listTasksUser, listTasksProject ,markTaskUrgent, addTaskAttachments, updateState, deleteTaskAttachments, setTaskTags} from "./task.controller.js";
+import {addTask, calificarEntrega, listTasksSprint,updateTask,deleteTask,reassignTask,listTasksUser, listTasksProject ,markTaskUrgent, addTaskAttachments, updateState, deleteTaskAttachments, setTaskTags} from "./task.controller.js";
 import { uploadTaskFiles } from "../middlewares/multer-uploads.js";
 import{ authMiddleware, authScrumMasterMiddleware } from "../middlewares/auth-validate.js";
 const router = Router();
@@ -37,5 +37,6 @@ router.delete(
 
 router.put("/updateStateTask/:id", updateState);
 
+router.post("/calificar", authMiddleware, calificarEntrega);
 
 export default router;
