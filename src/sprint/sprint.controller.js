@@ -3,6 +3,7 @@ import Project from "../project/project.model.js";
 import Backlog from "../backlog/backlog.model.js";
 import { createNotification } from "../helpers/notifications-validators.js";
 import Cluster from "../cluster/cluster.model.js";
+import cloudinary from "cloudinary";
 
 export const createSprint = async (req, res) => {
   try {

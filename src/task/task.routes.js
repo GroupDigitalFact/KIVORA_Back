@@ -12,7 +12,7 @@ router.get("/listTasksProject/:project", listTasksProject);
 
 router.get("/listTasksUser", authMiddleware, listTasksUser);
 
-router.put("/updateTask/:id", updateTask);
+router.put("/updateTask", updateTask);
 
 router.delete("/deleteTask", deleteTask);
 
