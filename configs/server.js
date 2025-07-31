@@ -3,6 +3,8 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import swaggerUi from "swagger-ui-express"
+import swaggerJsDoc from "swagger-jsdoc";
 import morgan from "morgan";
 import http from "http";
 import { dbConnection } from "./mongo.js";
@@ -43,6 +45,30 @@ io.on("connection", (socket) => {
   });
 });
 
+const swaggerDefinition = {
+    openapi: "3.0.0",
+    info: {
+        title: "Kivora API Documentation",
+        version: "1.0.0",
+        description: "Documentación de la API Kivora",
+    },
+    servers: [
+        {
+            url: `http://localhost:${process.env.PORT || 3002}`,
+            description: "Servidor local",
+        },
+    ],
+};
+
+const swaggerOptions = {
+    swaggerDefinition,
+    apis: ["./src/**/*.routes.js", "./src/**/*.model.js"],
+};
+
+const swaggerSpec = swaggerJsDoc(swaggerOptions);
+
+
+
 const middlewares = (app) => {
   app.use(express.urlencoded({ extended: false }));
   app.use(express.json());
@@ -50,6 +76,7 @@ const middlewares = (app) => {
   app.use(helmet());
   app.use(morgan("dev"));
   app.use(apiLimiter);
+  app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 };
 
 const routes = (app) => {
@@ -82,6 +109,7 @@ export const initServer = () => {
     routes(app);
     server.listen(process.env.PORT, () => {
       console.log(`Server running on port ${process.env.PORT}`);
+      console.log(`Swagger docs available at http://localhost:${process.env.PORT}/api-docs`);
     });
   } catch (err) {
     console.log(`Server init failed: `, err);

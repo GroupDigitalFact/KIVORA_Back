@@ -55,6 +55,8 @@ export const getMessages = async (req, res) => {
       { seen: true }
     );
 
+    console.log("Messages retrieved:", messages);
+
     return res.status(200).json({
       success: false,
       messages,
@@ -86,9 +88,13 @@ export const markMessageAsSeen = async (req, res) => {
 export const sendMessage = async (req, res) => {
   try {
     const { text } = req.body;
+    const files = req.files?.map((file) => file.path) || null;
+
     const { receiverId } = req.params;
 
     const senderId = req.usuario._id;
+
+    console.log("Sender ID:", senderId);
 
     const existingMessages = await Message.findOne({
       $or: [
@@ -97,7 +103,7 @@ export const sendMessage = async (req, res) => {
       ],
     });
 
-    console.log(existingMessages)
+    console.log(existingMessages);
 
     if (!existingMessages) {
       const sender = await User.findById(senderId);
@@ -125,13 +131,20 @@ export const sendMessage = async (req, res) => {
     const newMessage = await Message.create({
       senderId,
       receiverId,
+      files,
       text,
     });
 
+    const senderSocketId = userSocketMap[senderId];
     const receiverSocketId = userSocketMap[receiverId];
+
+    if (senderSocketId) {
+      io.to(senderSocketId).emit("newMessage", newMessage);
+    }
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("newMessage", newMessage);
     }
+
 
     return res.status(200).json({
       success: true,
@@ -141,6 +154,6 @@ export const sendMessage = async (req, res) => {
     return res.status(500).json({
       message: error.message,
       error: error,
-    });
-  }
+    });
+  }
 };

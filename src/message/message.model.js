@@ -16,8 +16,8 @@ const MessageSchema = new Schema(
     text:{
         type: String, 
     },
-    image:{
-        type: String, 
+    files:{
+        type: [String],
     },
     seen: {
         type: Boolean, 
@@ -40,4 +40,4 @@ MessageSchema.methods.toJSON = function () {
   return message;
 };
 
-export default mongoose.model("Message", MessageSchema);
+export default mongoose.model("Message", MessageSchema);

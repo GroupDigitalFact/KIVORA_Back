@@ -53,6 +53,22 @@ const taskFileFilter = (req, file, cb) => {
   }
 };
 
+const storageMessageFiles = new CloudinaryStorage({
+  cloudinary: cloudinary.v2,
+  params: {
+    folder: "messageFilesKivora",
+    public_id: (req, file) => {
+      const fileExtension = extname(file.originalname);
+      const fileName = file.originalname.split(fileExtension)[0];
+      return `${fileName}-${Date.now()}`;
+    },
+    allowed_formats: ["jpg", "png", "jpeg", "webp", "pdf", "docx", "xlsx", "pptx"],
+  },
+});
+
+
+
+
 export const uploadProfilePicture = multer({
   storage: profileImageStorage,
   fileFilter: (req, file, cb) => {
@@ -67,4 +83,26 @@ export const uploadTaskFiles = multer({
   storage: storageTaskFiles,
   fileFilter: taskFileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, 
+});
+
+const allowedMimes = [
+  "image/jpeg", "image/png", "image/webp",
+  "application/pdf",
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document", // docx
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", // xlsx
+  "application/vnd.openxmlformats-officedocument.presentationml.presentation" // pptx
+];
+
+const fileFilter = (req, file, cb) => {
+  if (allowedMimes.includes(file.mimetype)) {
+    cb(null, true);
+  } else {
+    cb(new Error("Formato de archivo no permitido"), false);
+  }
+};
+
+export const uploadMessageFiles = multer({
+  storage: storageMessageFiles,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 },
 });
